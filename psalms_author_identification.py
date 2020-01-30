@@ -10,7 +10,6 @@ def main():
 
     print(len(chapters_by_david))
 
-
 def clean_psalms():
 
     psalms = open('psalms.txt', 'r')
@@ -21,27 +20,35 @@ def clean_psalms():
 
     content_no_verses = re.sub('[0-9]{1,3}:[0-9]{1,3} ', '', content_no_selah)
 
-    # doesn't work
-    content_no_books = re.sub('BOOK+\n', '', content_no_verses)
-
-    content_no_single_lines = re.sub('\n(?:(?!ab).)\n\n', '', content_no_books)
+    content_no_single_lines = re.sub('\n(?:(?!ab).)\n\n', '', content_no_verses)
 
     content_split_on_chapter = re.split('\nPsalm [0-9]{1,3}\n', content_no_single_lines)
 
-    chapters_cleaned = []
+    content_split_on_chapter_no_books = []
 
-    for chapter in content_split_on_chapter[1:]:
+    for chapter in content_split_on_chapter:
 
-        lines = chapter.splitlines()
+        lines = chapter[1:].split("\n")
 
         chapter_no_title = ""
 
         if lines[2] == "":
+            print(lines[2])
             chapter_no_title += "\n".join(lines[2:])
         else:
             chapter_no_title += "\n".join(lines)
 
-        chapters_cleaned.append(chapter_no_title)
+        tmp_chapter = []
+        for line in chapter_no_title.split("\n"):
+            if "BOOK" not in line and "Book" not in line and line != "":
+                tmp_chapter.append(line)
+            else:
+                print(line)
+
+        content_split_on_chapter_no_books.append("\n".join(tmp_chapter))
+
+    chapters_cleaned = []
+
 
     psalms.close()
 
@@ -53,7 +60,7 @@ def write_cleaned_chapters(chapters_cleaned):
 
     for chapter in chapters_cleaned:
         psalms_cleaned.write(chapter)
-        psalms_cleaned.write('\n\n---------------------------------------------------------------\n')
+        psalms_cleaned.write('\n---------------------------------------------------------------\n')
 
     psalms_cleaned.close()
 
